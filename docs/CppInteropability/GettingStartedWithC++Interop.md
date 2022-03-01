@@ -1,6 +1,14 @@
+
+## General Feedback
+Most of it makes sense to me in a general sense, but there are some parts I am not clear on, and it may just be due to my lack of C++ experience, so feel free to discard any feedback or suggested changes as you see appropriate
+- I think that more screenshots would be helpful (I've noted the spots I think would be most helpful)
+- I would suggest trying to maintain consistency in using `code` notation in your text and the bullet point/non-bullet points
+- I would suggest using additional levels on your bullet points to help differentiate steps vs details
+
+
 #  Getting started with C++ Interoperability
 
-This document is desgined to get you started with bidirectional API-level interoperability between Swift and C++.
+This document is designed to get you started with bidirectional API-level interoperability between Swift and C++.
 
 ## Table of Contents
 
@@ -11,9 +19,13 @@ This document is desgined to get you started with bidirectional API-level intero
 
 ## Creating a Module to contain your C++ source code
 
-- Create a new C++ implementation and header file
-- For this example we will call the files Cxx, so we should have a Cxx.cpp and Cxx.hpp.
-- Next create an empty file and call it `module.modulemap`, in this file create the module for your source code, and define your C++ header (`requires cplusplus` isn't required but it's convention for C++ modules, especially if they use C++ features).
+- Create your C++ implementation and header files
+  - In this example we are naming our `module` Cxx, but this can be whatever you choose
+  - Our implementation and header files will be named `Cxx.cpp` and `Cxx.hpp` respectively
+- Next create an empty file named `module.modulemap`, 
+  - Inside this file create the `module` for your source code, and 
+  - Define your C++ `header` 
+  - Note: `requires cplusplus` isn't required but it is convention for a C++ `module`, especially if the `module` uses C++ features
 
 ```
 //In module.modulemap
@@ -24,27 +36,33 @@ module Cxx {
 }
 ```
 
-- Move the newly created files (Cxx.cpp, Cxx.hpp, module.modulemap) into a separate directory (this should remain in your project directory)
+- Move the newly created files (`Cxx.cpp`, `Cxx.hpp`, `module.modulemap`) into a separate directory
+  - This directory should remain in your project directory 
+  - // Where should it go? At the root level? Top level inside project? Possibly include a screenshot showing the C++ directory in relation to the project directory? //
 
 <img width="252" alt="Screen Shot 2022-02-26 at 9 14 06 PM" src="https://user-images.githubusercontent.com/62521716/155867937-9d9d6c62-4418-414d-bc4e-5d12c2055022.png">
 
 ## Adding C++ to an Xcode project
-- In your xcode project, follow the steps [Creating a Module to contain your C++ source code](#creating-a-module-to-contain-your-c-source-code) in your project directory
+After [Creating a Module to contain your C++ source code](#creating-a-module-to-contain-your-c-source-code) in your project directory:
 
-Add the C++ module to the include path and enable C++ interop:
-- Navigate to your project directory 
-- In `Project` navigate to `Build Settings` -> `Swift Compiler`
-- Under `Custom Flags` -> `Other Swift Flags` add`-Xfrontend -enable-cxx-interop`
-- Under `Search Paths` -> `Import Paths` add your search path to the C++ module (i.e, `./ProjectName/Cxx`).
+- Add the C++ module to the `Build Settings` to enable C++ interop
+  - Navigate to your project directory 
+  - In `Project` navigate to `Build Settings` -> `Swift Compiler`
+  - Under `Custom Flags` -> `Other Swift Flags` add `-Xfrontend -enable-cxx-interop`
+  - Under `Search Paths` -> `Import Paths` add your search path to the C++ `module` (i.e, `./ProjectName/Cxx`).
+  - // A screenshot showing these nested settings/navigation would be huge, especially with yellow boxes around the specific new setting or arrows or something //
 
 ```
 //Add to Other Swift Flags and Import Paths respectively
 -Xfrontend -enable-cxx-interop 
--I./ProjectName/Cxx
+-I./ProjectName/Cxx // Should the "I" be here? If so, what is it for? Possibley provide a brief explanation if it is out of scope //
 ```
 
-- This should now allow your to import your C++ Module into any `.swift` file.
+- You should now be able to import your C++ `module` into any `.swift` file in your project // Should "Module" be capitalized? Some places it is, some places not//
 
+**Importing our `module` and using the `cxxFunction` from our .swift file**
+
+// Possibly add captions as to what you are demo-ing in these example snippets //
 ```
 //In ViewController.swift
 import UIKit
@@ -59,6 +77,7 @@ class ViewController: UIViewController {
 }
 ```
 
+**Defining our `cxxFunction` method in our implementation file**
 ```
 //In Cxx.cpp
 
@@ -69,6 +88,7 @@ int cxxFunction(int n) {
 
 ```
 
+**Exposing our `cxxFunction` method in our header file**
 ```
 //In Cxx.hpp
 
@@ -83,15 +103,27 @@ int cxxFunction(int n);
 
 
 ## Creating a Swift Package
-After creating your Swift package project, follow the steps [Creating a Module to contain your C++ source code](#creating-a-module-to-contain-your-c-source-code) in your `Source` directory
+- Create a Swift Package project in Xcode // Should "project" be capitalized? Is there a link to an Apple doc on how to create a Swift Package that you could direct people to? //
+  - In this example, we named the package `Cxx_Interop`
+- Add your C++ `module` directory to the `Source` directory in your project // Screenshot would be great showing file structure relationship //
+  - C++ source code follows the example shown in [Creating a Module to contain your C++ source code](#creating-a-module-to-contain-your-c-source-code)
+- Configure the Swift target dependencies and compiler flags in the project `Package Manifest`
+- Create a Swift file in your C++ `module` directory to contain your Swift code
+  - In the example we name this file `main.swift` and it is located in the `Sources/Cxx_Interop` directory // Another screenshot //
+- Add yopur C++ `module` to the appropriate targets
+  - Navigate to `Targets` // where is this? //
+  - Select the `Add` button
+  - Add your C++ module
+  - Add the directory containing the Swift code // I have no idea the actual steps, just giving an example to replace the next bullet //
+- Under targets, add the name of your C++ module and the directory containing the Swift code as a target. // More explicit step by step instructions would be clearer, especially with screenshots with highlighting, for this bullet and the next //
+- In the target defining your Swift target, add a`dependencies` to the C++ Module, the `path`, `source`, and `swiftSettings` with `unsafeFlags` with the source to the C++ Module, and enable `-enable-cxx-interop` // The wording on this is a little confusing //
+- Add C++ `module` and underlying targets and dependencies to the `Package Manifest`, including:
+  - C++ `module` `dependencies`
+  - `path`
+  - `sources` 
+  - `swiftSettings` with `unsafeFlags` to enable `cxx-interop`
 
-- In your Package Manifest, you need to configure the Swift target's dependencies and compiler flags
-- In this example the name of the package is `Cxx_Interop`
-- Swift code will be in `Sources/Cxx_Interop` called `main.swift`
-- C++ source code follows the example shown in [Creating a Module to contain your C++ source code](#creating-a-module-to-contain-your-c-source-code)
-- Under targets, add the name of your C++ module and the directory containing the Swift code as a target.
-- In the target defining your Swift target, add a`dependencies` to the C++ Module, the `path`, `source`, and `swiftSettings` with `unsafeFlags` with the source to the C++ Module, and enable `-enable-cxx-interop`
-
+**Your `Package Manifest` should look like the following, if you have been following the example**
 ```
 //In Package Manifest
 
@@ -128,8 +160,9 @@ let package = Package(
 
 ```
 
-- We are now able to import our C++ Module into our swift code, and import the package into existing projects
+- You should now be able to import your C++ Module into your Swift code, and import the package into existing projects
 
+**Using the Cxx `module` in a Swift Struct**
 ```
 //In main.swift
 
@@ -148,14 +181,14 @@ print(Cxx_Interop().callCxxFunction(n: 7))
 ```
 
 ## Building with CMake
-After creating your project follow the steps [Creating a Module to contain your C++ source code](#creating-a-module-to-contain-your-c-source-code)
+After creating your project follow the steps [Creating a Module to contain your C++ source code](#creating-a-module-to-contain-your-c-source-code) // Is this the same as the first bullet point - create a CMakeList.txt file?
 
 - Create a `CMakeLists.txt` file and configure for your project
-- In`add_library` invoke `cxx-support` with the path to the C++ implementation file
-- Add the `target_include_directories` with `cxx-support` and path to the C++ Module `${CMAKE_SOURCE_DIR}/Sources/Cxx`
-- Add the `add_executable` to the specific files/directory you would like to generate source, with`SHELL:-Xfrontend -enable-cxx-interop`.
-- In the example below we will be following the file structure used in [Creating a Swift Package](#Creating-a-Swift-Package) 
+- In `add_library` invoke `cxx-support` with the path to the C++ implementation file
+- Add the `target_include_directories` with `cxx-support` and `module` path to the C++ Module `${CMAKE_SOURCE_DIR}/Sources/Cxx`
+- Add the `add_executable` to the specific files/directory you would like to generate source, with`SHELL:-Xfrontend -enable-cxx-interop`
 
+**Example CMakeLists.txt file, using the same file structure used in [Creating a Swift Package](#Creating-a-Swift-Package)**
 ```
 //In CMakeLists.txt
 
@@ -199,7 +232,7 @@ Cxx_Interop.main()
 
 ```
 
-- In your projects direcetoy, run `cmake` to generate the systems build files
+- In your projects directory, run `cmake` to generate the systems build files // Is this being done in terminal? If so, I would explicitly state that //
 
 - To generate an Xcode project run `cmake -GXcode` 
 - To generate with Ninja run `cmake -GNinja`
